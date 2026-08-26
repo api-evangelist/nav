@@ -1,0 +1,87 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.nav.com/nav-prime/
+checked: '2026-08-26'
+summary: >-
+  Nav publishes retail prices for its END-USER subscription product (Nav Prime) but publishes NO
+  price, tier, quota or overage for API or partner access. The two are different products and this
+  file records both facts, because a reader who sees "prices published" for Nav could otherwise
+  assume the API is self-serve priced. It is not: the Partner API and the widget SDK are sold
+  through "Book a demo" on the Embedded Business Credit page, keys are issued by an account manager
+  during onboarding, and the partner economics are described only as "a wholesale pricing model" for
+  reselling Nav Prime.
+api_pricing:
+  published: false
+  self_serve: false
+  gate: partner agreement + account-manager onboarding
+  cta: Book a demo
+  cta_url: https://www.nav.com/embedded-business-credit/
+  partner_model_statement: >-
+    "Offer Nav Prime via a wholesale pricing model with the option to bundle services, upsell
+    premium experiences, or enhance membership offerings for your customer base."
+  plan_code_note: >-
+    Partner-specific plan codes (e.g. "my_company_standard") are provisioned during onboarding and
+    referenced by POST /v1/accounts and PUT /v1/accounts/{accountId}/plan. The catalogue of plan
+    codes is per-partner and is not published, and no API operation lists them.
+plan_count: 4
+prices_published: true
+prices_scope: end-user retail subscription (Nav Prime), not API access
+currency: USD
+billing_period: month
+billing_alternative: 'quarterly — Nav states quarterly billing saves 20%'
+public_signup_pricing: true
+plans:
+- name: Free
+  price: 0
+  currency: USD
+  billing_period: month
+  positioning: '"Start for free with basic tools"'
+  included_quota: null
+  overage: null
+  limits: 'Basic tools only; the specific feature set of the free tier is not itemised on the page.'
+- name: Track
+  price: 39.99
+  currency: USD
+  billing_period: month
+  positioning: For new or established businesses looking to monitor credit.
+  included:
+  - 5 credit scores, alerts and reports from D&B, Experian, Equifax and TransUnion
+  - Exclusive discounts on fees from Nav's lending partner
+  included_quota: null
+  overage: null
+- name: Build
+  price: 49.99
+  currency: USD
+  billing_period: month
+  badge: Popular
+  positioning: For growing businesses looking to build business credit with up to 2 tradelines.
+  included:
+  - 5 credit scores, alerts and reports from D&B, Experian, Equifax and TransUnion
+  - Exclusive discounts on fees from Nav's lending partner
+  - One tradeline to build business credit (the membership payment itself)
+  - Bookkeeping tools for cash flow and tax prep
+  - Nav Credit Builder Card (in beta, not included at signup)
+  included_quota: null
+  overage: null
+- name: Expand
+  price: 74.99
+  currency: USD
+  billing_period: month
+  positioning: For businesses seeking 1-on-1 guidance.
+  included:
+  - Everything in Build
+  - Business Credit Coaching
+  - FICO SBSS score to track eligibility with 7,500+ lenders and the SBA
+  included_quota: null
+  overage: null
+notes:
+  card_product: >-
+    The Nav Credit Builder Card is serviced by Parafin, issued by Column N.A. (Member FDIC) under a
+    Visa U.S.A. licence and powered by Marqeta. Nav Technologies is a financial technology company,
+    not a bank.
+  lending_partner: >-
+    Loans and lines of credit are made available by Fundbox or its bank partners, First Electronic
+    Bank and Lead Bank.
+  licence: >-
+    "California loans arranged pursuant to Department of Financial Protection & Innovation Lenders
+    License 60DBO-98588."

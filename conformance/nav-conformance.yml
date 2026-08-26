@@ -1,0 +1,175 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://api-docs.nav.com/docs/rest-api/* + live probes of Nav hosts, 2026-08-26
+checked: '2026-08-26'
+standards:
+- id: openapi
+  conforms: false
+  evidence: >-
+    No OpenAPI or Swagger document is served anywhere. Probed on api.nav.com and api-docs.nav.com:
+    /openapi.json, /openapi.yaml, /openapi, /swagger.json, /swagger/v1/swagger.json, /api-docs,
+    /v1/openapi.json, /v1/api-docs, /v1/swagger.json, /docs, /redoc, /spec, /v1/spec,
+    /.well-known/openapi.json — all 404. The Docusaurus JS bundle references no spec asset. The API
+    reference is hand-authored MDX.
+- id: graphql
+  conforms: partial
+  evidence: >-
+    Nav documents a GraphQL API at https://api.nav.com/partners/graphql but marks it deprecated and
+    states it "will not receive new features". An unauthenticated introspection POST returned 404 on
+    production and 503 on sandbox (2026-08-26); Nav states the schema reference is generated on
+    demand from the live API and is deliberately not checked in. No SDL was captured.
+- id: asyncapi
+  conforms: false
+  evidence: No AsyncAPI document, and no event, streaming or webhook surface is documented at all.
+- id: webhooks
+  conforms: false
+  evidence: >-
+    Nav documents no outbound webhooks. A partner learns nothing asynchronously — there is no
+    callback when an account's activationStatus changes, when bureau matching completes, or when a
+    tradeline reports. The only event surface is browser DOM CustomEvents fired by the widget
+    inside the partner's own page.
+- id: mcp
+  conforms: false
+  evidence: No MCP server published; /mcp probes 404 on every host. See mcp/nav-mcp.yml.
+- id: a2a
+  conforms: false
+  evidence: >-
+    No agent card. /.well-known/agent-card.json and /.well-known/agent.json 404 on api.nav.com,
+    api.sandbox.nav.com, www.nav.com, api-docs.nav.com and developer.nav.com; app.nav.com answers
+    200 with an SPA shell for every path, which is a catch-all, not a card.
+- id: oauth2
+  conforms: false
+  evidence: >-
+    Authentication is a static Bearer API key issued out of band. No authorization server, no token
+    endpoint, no scopes, no refresh.
+- id: oidc
+  conforms: false
+  evidence: /.well-known/openid-configuration 404 on every Nav host.
+- id: rfc8414-authorization-server-metadata
+  conforms: false
+  evidence: /.well-known/oauth-authorization-server 404 on every Nav host.
+- id: rfc9728-protected-resource-metadata
+  conforms: false
+  evidence: /.well-known/oauth-protected-resource 404 on every Nav host.
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: /.well-known/security.txt 404 on api.nav.com, api.sandbox.nav.com, www.nav.com and both docs hosts.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: >-
+    Errors are bespoke JSON. Documented as {"message": "..."}; the live /v1 surface returns
+    {"code":"NOT_FOUND","message":"Not Found"}. No application/problem+json, no type URI, no
+    instance. See errors/nav-problem-types.yml.
+- id: rfc8594-sunset-header
+  conforms: false
+  evidence: >-
+    No Deprecation or Sunset headers and no dated sunset policy — although Nav does maintain a
+    published, navigable Deprecated documentation section naming the replacement for each superseded
+    surface. See lifecycle/nav-lifecycle.yml.
+- id: idempotency-key
+  conforms: partial
+  evidence: >-
+    Idempotency-Key is documented on POST /v1/accounts with a 24-hour retention window and a 256
+    character maximum, per the emerging IETF idempotency-key-header pattern. It is documented on
+    that one operation only. See conventions/nav-conventions.yml.
+- id: rate-limit-headers
+  conforms: partial
+  evidence: >-
+    X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset are returned on all responses —
+    the de facto convention, not the IETF RateLimit-* draft field names. No Retry-After.
+- id: rfc3339-timestamps
+  conforms: partial
+  evidence: >-
+    createdAt, endedAt and expiresAt are RFC 3339. POST /v1/sso-token instead returns
+    expiresAtMillis as a string-encoded epoch-milliseconds int64 for the same concept.
+- id: e164-phone-numbers
+  conforms: true
+  evidence: >-
+    Phone fields are specified as E.164 ("+14155551234") on both ExternalPersonContactInformation
+    and BusinessContactInformation.
+- id: iso8601-dates
+  conforms: true
+  evidence: BusinessEstablishment.establishedOn is specified as ISO 8601 YYYY-MM-DD.
+- id: grpc-canonical-error-codes
+  conforms: true
+  evidence: >-
+    Operation descriptions and the observed error envelope use the Google/gRPC canonical status
+    codes NOT_FOUND, PERMISSION_DENIED and INVALID_ARGUMENT rather than bare HTTP semantics —
+    evidence of a gRPC core fronted by HTTP transcoding.
+- id: w3c-custom-elements
+  conforms: true
+  evidence: >-
+    The embeddable surface is a standards-based custom element, <nav-credit-widget>, registered by
+    @navinc/widget-sdk, with bubbling CustomEvents and a documented attribute/method API. See
+    components/nav-components.yml.
+domain_standards:
+  note: >-
+    REWARD-ONLY check. Nav operates in US small-business credit and lending. The domain identifier
+    schemes it speaks are captured below; Nav does NOT implement a domain MESSAGE standard (no FDX,
+    no ISO 20022, no X12, no Metro 2 surface is exposed to partners), so nothing is asserted beyond
+    what the contract genuinely declares.
+  declared:
+  - id: naics
+    conforms: true
+    evidence: >-
+      RegisterAccountBusinessInput.industry.naics.code is specified as a NAICS industry code, 2-6
+      digits, e.g. "541511" — the US federal industry classification standard, declared in the
+      contract's own field table.
+    location: 'Partner API reference, business.industry.naics (Naics) field table'
+  - id: duns
+    conforms: true
+    evidence: >-
+      RegisterAccountBusinessIdentifiersInput.dunsNumber is specified as a Dun & Bradstreet DUNS
+      number — the credit-bureau entity identifier standard for this market.
+    location: 'Partner API reference, business.identifiers field table'
+  - id: ein-irs
+    conforms: true
+    evidence: >-
+      employerIdentificationNumber is specified in IRS format 12-3456789, with an explicit
+      instruction not to send SSNs or TINs.
+    location: 'Partner API reference, business.identity and business.identifiers field tables'
+  - id: experian-bin
+    conforms: true
+    evidence: RegisterAccountBusinessIdentifiersInput.experianBin — Experian Business Identification Number.
+  - id: usps-state-codes
+    conforms: true
+    evidence: StatesUSState enum — two-letter USPS state and territory codes, 57 values.
+  - id: fico-sbss
+    conforms: false
+    evidence: >-
+      Nav markets the FICO SBSS score in the Nav Prime Expand plan, but no partner API operation
+      returns it. A marketing claim, not a contract declaration — recorded as not conformant on
+      purpose.
+  not_applicable:
+  - id: fdx
+    reason: >-
+      Nav is not an open-banking data provider; it does not expose account/transaction data to
+      third parties over an FDX surface.
+  - id: iso-20022
+    reason: No payment messaging surface in the partner API.
+  - id: metro2
+    reason: >-
+      Nav furnishes tradeline data to bureaus as part of Nav Prime, but that furnishing pipeline is
+      not exposed to partners and no Metro 2 shape appears in the contract.
+compliance_program:
+  published: false
+  probes:
+  - url: https://trust.nav.com
+    status: 0
+    note: host does not resolve
+  - url: https://www.nav.com/security/
+    status: 404
+  - url: https://www.nav.com/security-vulnerability-disclosure/
+    status: 404
+  note: >-
+    No trust center and no named certification (SOC 2, ISO 27001, PCI DSS) is published anywhere on
+    nav.com. NO Compliance pointer is emitted — the compliance_published check must read a genuine
+    zero for this provider.
+regulatory_context:
+  note: >-
+    Recorded as context, not as a conformance claim. Nav discloses a California Department of
+    Financial Protection & Innovation Lenders License (60DBO-98588) in its site footer and states
+    "Nav Technologies, Inc. is a financial technology company, not a bank". Consumer/business credit
+    data handling in the US falls under FCRA, and Nav publishes a CCPA request path at
+    https://www.nav.com/privacy/ccpa-request/. None of these is asserted by the API contract.

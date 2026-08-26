@@ -1,0 +1,213 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://api-docs.nav.com/docs/rest-api/guides/request-validation +
+  https://api-docs.nav.com/docs/rest-api/guides/base-url +
+  https://api-docs.nav.com/docs/rest-api/guides/rate-limiting +
+  https://api-docs.nav.com/docs/rest-api/partner-api
+checked: '2026-08-26'
+summary: >-
+  Cross-cutting request/response semantics for the Nav Partner API, transcribed from the published
+  REST guides. Nav publishes no OpenAPI, so nothing here is derived from a spec — every value is a
+  documented statement.
+authentication:
+  style: api_key_header_bearer
+  header: Authorization
+  value: Bearer <api_key>
+  see: authentication/nav-authentication.yml
+base_urls:
+  production: https://api.nav.com
+  sandbox: https://api.sandbox.nav.com
+  note: >-
+    "The sandbox behaves identically to production but does not create real accounts or trigger real
+    downstream effects." Environment is chosen by host, not by credential prefix.
+versioning:
+  scheme: path-prefix
+  current: v1
+  example: POST https://api.nav.com/v1/accounts
+  documented_version_field: 'Partner API reference declares "Version: v1"'
+  policy_published: false
+  note: >-
+    A /v1 path prefix is present on every operation but Nav publishes no versioning policy — no
+    statement of what constitutes a breaking change, no version support window, no date-based
+    version header. See lifecycle/nav-lifecycle.yml.
+idempotency:
+  documented: true
+  header: Idempotency-Key
+  scope: 'POST /v1/accounts (Create Account) only'
+  retention_window: 24 hours
+  max_length_chars: 256
+  recommended_value: UUIDv4
+  behavior: >-
+    "If the same key is sent within 24 hours, the original response is returned rather than creating
+    a duplicate account. Use a unique value per request (e.g. UUIDv4), and resend the same key when
+    retrying a failed request."
+  source: https://api-docs.nav.com/docs/rest-api/guides/request-validation
+  coverage_gap: >-
+    Idempotency-Key is documented for exactly ONE of the nine operations. PUT /v1/accounts/{id}/plan
+    and PUT /v1/origins are natively idempotent by virtue of being full replacements; DELETE
+    /v1/accounts/{id} is documented as idempotent in its own description ("succeeds if the
+    relationship does not exist or is already ended"). The two remaining POST writes —
+    POST /v1/sso-token and POST /v1/sso-login-url — mint single-use short-lived credentials and
+    accept no idempotency key, so a retried mint produces a second token; that is low-consequence
+    (both expire in 2 minutes) but it is not replay-safe.
+  agent_note: >-
+    An agent creating Nav accounts SHOULD send an Idempotency-Key on every POST /v1/accounts. It is
+    the only Nav write that creates a durable, non-reversible object.
+strict_validation:
+  documented: true
+  header: X-Strict-Validation
+  value: 'true (any value activates it)'
+  default_behavior: >-
+    By default the API ACCEPTS unknown fields and logs them for monitoring rather than rejecting the
+    request.
+  strict_behavior: >-
+    With the header present, a request carrying fields not in the schema is rejected with 400 Bad
+    Request and the response names the offending paths, e.g.
+    {"message":"unknown fields detected: [extraField, nested.unknownProperty]"}.
+  agent_note: >-
+    This is unusually useful for an agent: it is a server-side dry-run of the request SHAPE. An
+    agent that has inferred a request body from prose documentation (which is the only option here,
+    since there is no OpenAPI) can set X-Strict-Validation: true to have Nav tell it exactly which
+    invented field names are wrong, before running without it.
+  source: https://api-docs.nav.com/docs/rest-api/guides/request-validation
+dry_run_mode:
+  supported: partial
+  mechanism: X-Strict-Validation
+  note: >-
+    Not a true dry run — it validates the request shape but still executes the request when the
+    shape is valid. A full sandbox environment (api.sandbox.nav.com) is the actual rehearsal
+    surface. See sandbox/nav-sandbox.yml.
+pagination:
+  documented: false
+  note: >-
+    No collection-listing operation exists in the nine documented operations — every read is a
+    single-resource GET (GET /v1/accounts/{accountId}) or a whole-list replacement
+    (GET/PUT /v1/origins). There is nothing to paginate, so pagination is `na` rather than missing.
+  applicability: na
+field_expansion:
+  supported: false
+  note: No expand/fields/sparse-fieldset parameters documented on any operation.
+metadata:
+  supported: false
+  note: No customer-defined metadata field documented on any Nav object.
+request_tracing:
+  documented: false
+  note: >-
+    No request-id / correlation-id header is documented on requests or responses. An agent
+    troubleshooting a failed Nav call has no identifier to quote to support other than the
+    accountId. This is a real gap for a partner-gated API whose only support channel is an account
+    manager.
+error_envelope:
+  format: bespoke JSON
+  shape: '{"message": "<human readable string>"}'
+  rfc9457: false
+  machine_readable_code: partial
+  note: >-
+    Two envelope shapes are in evidence. Guides show a flat {"message": "..."} body (rate limiting,
+    strict validation). Operation descriptions in the Partner API reference name symbolic codes —
+    NOT_FOUND, PERMISSION_DENIED, INVALID_ARGUMENT — which are gRPC/Google-API canonical codes, and
+    a live probe of https://api.nav.com/v1/openapi.json returned {"code":"NOT_FOUND","message":"Not
+    Found"}, i.e. a {code, message} envelope on the /v1 surface. Nav does not document the
+    {code,message} shape anywhere; it was observed. There is no `type` URI, no `instance`, and no
+    application/problem+json. See errors/nav-problem-types.yml.
+rate_limit_signaling:
+  headers: [X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset]
+  status_on_exhaustion: 429
+  retry_after: not documented
+  see: rate-limits/nav-rate-limits.yml
+identifiers:
+  style: prefixed opaque strings
+  examples:
+    account: acct_kEbVRwd8Dz
+    business: biz_kEbVRwd8Dz
+  note: >-
+    Type-prefixed IDs (acct_, biz_) let a client tell what it is holding. See
+    data-model/nav-data-model.yml.
+timestamps:
+  format: RFC 3339
+  examples: ['2024-01-15T10:30:00Z']
+  exception: >-
+    POST /v1/sso-token returns `expiresAtMillis` as a string-encoded int64 epoch-milliseconds value,
+    inconsistent with the RFC 3339 `expiresAt` returned by POST /v1/sso-login-url for the same
+    concept.
+value_formats:
+  phone: E.164, e.g. +14155551234 (object form {"e164":"..."} also accepted)
+  date: ISO 8601 YYYY-MM-DD (object form {"year":..,"month":..,"day":..} also accepted)
+  us_state: two-letter USPS code, enum StatesUSState (50 states + DC + 6 territories)
+  ein: '12-3456789'
+  naics: 2-6 digit code string
+  zip: 12345 or 12345-6789
+  note: >-
+    Several fields accept BOTH a scalar and an object form. That is generous for a human integrator
+    and ambiguous for an agent, because nothing machine-readable declares the union.
+reversibility:
+  grade: verified
+  applicability: write-surface-present
+  summary: >-
+    Nav documents a genuine reversal path for its principal write (account/partner relationship) AND
+    states the window it operates in, so this grades `verified` rather than merely `documented`. The
+    reversal is narrow though: it unwinds the PARTNER RELATIONSHIP, not the Nav account, and one
+    terminal state is explicitly permanent.
+  surfaces:
+  - write: Create Account
+    operation: POST /v1/accounts
+    creates: A Nav account plus a partner relationship, and a Business record.
+    reversal: End Partner Relationship
+    reversal_operation: DELETE /v1/accounts/{accountId}
+    window: >-
+      No time limit stated — the relationship may be ended at any point while it exists. The
+      operation is explicitly idempotent: "succeeds if the relationship does not exist or is already
+      ended". Its `endedAt` field additionally lets the caller BACKDATE the end of the relationship
+      to a past RFC 3339 timestamp rather than only ending it as of now.
+    window_source: https://api-docs.nav.com/docs/rest-api/partner-api
+    restrictions: >-
+      Returns PERMISSION_DENIED if the partner is Nav-Direct. Requires a `reason` from the
+      EndedReason enum (other | non_payment | contract_ended | subscription_canceled).
+    what_is_not_reversed: >-
+      Ending the relationship does not delete the Nav account, the business record, or any credit
+      data. The account persists under Nav's own ActivationStatus lifecycle.
+    confidence: high
+  - write: Change Plan
+    operation: PUT /v1/accounts/{accountId}/plan
+    reversal: same operation
+    window: >-
+      Unlimited — a plan change is a full replacement and is reversed by issuing the call again with
+      the previous planCode. The caller must have recorded the previous planCode itself; no Nav
+      operation returns an account's current plan, so the prior value is NOT recoverable from the
+      API.
+    confidence: high
+    agent_risk: >-
+      An agent must persist the pre-change planCode before calling, or the change is irreversible in
+      practice despite being reversible in principle.
+  - write: Replace Origin Allow List
+    operation: PUT /v1/origins
+    reversal: same operation
+    window: >-
+      Unlimited — GET /v1/origins returns the current list, so an agent can read-before-write and
+      restore the exact prior value. This is the one Nav write with a complete, self-contained undo.
+    confidence: high
+  - write: Resolve Credit Visibility
+    operation: POST /v1/accounts/{accountId}/credit-visibility
+    reversal: none
+    window: null
+    note: >-
+      Runs bureau matching and AUTO-CONFIRMS high-confidence matches with no user interaction. No
+      un-confirm, un-match or re-open operation is documented. Treat as irreversible.
+    confidence: high
+    agent_risk: >-
+      This is the highest-consequence unreversible call on the Nav surface: it binds a business to
+      bureau credit files at D&B, Experian, Equifax and SBFE without a human in the loop, and
+      nothing in the documented API undoes it.
+  - write: Create SSO Token / Create SSO Login URL
+    operation: POST /v1/sso-token, POST /v1/sso-login-url
+    reversal: none
+    window: null
+    note: >-
+      No revoke operation. Mitigated by design: both are single-use and expire in 2 minutes.
+  terminal_states_note: >-
+    The ActivationStatus enum documents two account states that are explicitly unrecoverable —
+    `anonymized` ("permanently unusable. Create a new account") and `disabled_by_admin` ("cannot be
+    reactivated"). Neither is reachable through the partner API, but an agent reading account state
+    should treat them as absorbing.
+  source: https://api-docs.nav.com/docs/rest-api/partner-api

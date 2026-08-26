@@ -1,0 +1,101 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://api-docs.nav.com/docs/rest-api/partner-api +
+  https://api-docs.nav.com/docs/rest-api/auth/partner-api-key +
+  https://api-docs.nav.com/docs/rest-api/guides/rate-limiting +
+  https://api-docs.nav.com/docs/rest-api/guides/request-validation
+  (plus one live unauthenticated probe of https://api.nav.com/v1/openapi.json)
+checked: '2026-08-26'
+format: bespoke-json
+rfc9457: false
+envelope:
+  documented_shape: '{"message": "<human readable string>"}'
+  observed_shape: '{"code": "NOT_FOUND", "message": "Not Found"}'
+  observed_on:
+  - url: https://api.nav.com/v1/openapi.json
+    status: 404
+    body: '{"code":"NOT_FOUND","message":"Not Found"}'
+    checked: '2026-08-26'
+  discrepancy_note: >-
+    Nav's guides show a flat {"message": ...} body, but the live /v1 surface returns a {code,
+    message} pair whose `code` is a canonical gRPC/Google-API status string. The reference text uses
+    those same symbolic codes (NOT_FOUND, PERMISSION_DENIED, INVALID_ARGUMENT) when describing
+    failure conditions, which is strong evidence the API is a gRPC service fronted by an HTTP
+    transcoder. Nav does not document the `code` field anywhere. An agent should read `code` when
+    present and fall back to `message`.
+  problem_json_media_type: false
+  type_uri: false
+  instance: false
+  errors_array: false
+problems:
+- status: 400
+  code: INVALID_ARGUMENT
+  title: Invalid argument
+  detail: >-
+    A field value fails validation (e.g. planCode is not owned by the partner on
+    PUT /v1/accounts/{accountId}/plan), or — with X-Strict-Validation: true — the request body
+    carries fields not defined in the schema.
+  example_body: '{"message": "unknown fields detected: [extraField, nested.unknownProperty]"}'
+  remediation: >-
+    Correct the field. For unknown-field rejections the message names the offending JSON paths.
+    Removing the X-Strict-Validation header downgrades unknown fields from a rejection to a logged
+    warning.
+  source_operation: PUT /v1/accounts/{accountId}/plan, POST /v1/accounts
+- status: 401
+  code: null
+  title: Unauthorized
+  detail: API key is missing or invalid.
+  remediation: >-
+    Send `Authorization: Bearer <api_key>`. Keys are issued by Nav during partner onboarding;
+    contact the Nav account manager to rotate or reissue.
+  source_operation: all
+- status: 403
+  code: PERMISSION_DENIED
+  title: Permission denied
+  detail: >-
+    The API key is valid but the operation is not permitted for this partner. Documented
+    specifically for DELETE /v1/accounts/{accountId} when the partner is Nav-Direct.
+  remediation: Confirm with Nav that the partner entitlement covers this operation.
+  source_operation: all; explicitly DELETE /v1/accounts/{accountId}
+- status: 404
+  code: NOT_FOUND
+  title: Not found
+  detail: >-
+    accountId is invalid, or the partner has no active relationship with the account. Also returned
+    for an unknown path on the /v1 surface.
+  remediation: >-
+    Verify the accountId (format acct_<opaque>). Note that DELETE /v1/accounts/{accountId} returns
+    NOT_FOUND only for an invalid account id — an already-ended relationship succeeds rather than
+    404s.
+  source_operation: GET/DELETE /v1/accounts/{accountId}, PUT /v1/accounts/{accountId}/plan
+- status: 426
+  code: null
+  title: Upgrade required (widget SDK too old)
+  detail: >-
+    Returned to the embedded widget iframe when the loaded @navinc/widget-sdk version is below the
+    minimum Nav's server accepts. Surfaced to the host page as the SDK_VERSION_TOO_OLD widget error
+    code.
+  remediation: Upgrade @navinc/widget-sdk. Nav states it notifies partners before raising the minimum.
+  source_operation: widget session exchange (app.nav.com)
+  see: errors/nav-error-codes.yml
+- status: 429
+  code: null
+  title: Rate limit exceeded
+  detail: More than 10 requests in one second on a single API key.
+  example_body: '{"message": "Rate limit exceeded"}'
+  remediation: >-
+    Wait until the epoch second in X-RateLimit-Reset, then retry. No Retry-After header is
+    documented.
+  source_operation: all
+  see: rate-limits/nav-rate-limits.yml
+gaps:
+  no_error_reference_page: >-
+    Nav publishes no consolidated REST error reference. The statuses above were assembled from four
+    separate guide pages plus operation-level prose. By contrast the WIDGET surface DOES have a
+    dedicated error-code reference — see errors/nav-error-codes.yml — so the omission is on the API
+    side specifically.
+  no_error_codes_per_field: >-
+    Validation failures return a single human-readable `message` string. There is no per-field error
+    array, so a client cannot programmatically map a rejection back to the form field that caused
+    it.

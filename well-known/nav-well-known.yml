@@ -1,0 +1,152 @@
+generated: '2026-08-26'
+method: probed
+source: live probes of /.well-known/* on every Nav host, 2026-08-26
+checked: '2026-08-26'
+summary: >-
+  Nav serves NO /.well-known/ discovery document on any host. api.nav.com and api.sandbox.nav.com
+  return a plain-text Go "404 page not found" for every path; www.nav.com and the Docusaurus docs
+  hosts return their own 404 pages; app.nav.com answers HTTP 200 with a 110KB single-page-app shell
+  for EVERY /.well-known/* path including ones that cannot exist, which is a catch-all, not a
+  document.
+hit_count: 0
+pointer_basis: >-
+  NO WellKnown pointer and NO SecurityTxt pointer are emitted. Every probe below is a miss, and the
+  only 200s in the set are app.nav.com SPA shells. Promoting those would credit Nav with a discovery
+  surface it does not serve.
+soft_404_control:
+  host: https://app.nav.com
+  probe: /.well-known/agent-card.json
+  status: 200
+  content_type: text/html; charset=utf-8
+  bytes: 110261
+  note: >-
+    /.well-known/openid-configuration on the same host returns 110266 bytes and /llms.txt returns
+    110176 bytes — the same shell with a different path echoed into it. Confirmed catch-all.
+hosts:
+- host: https://api.nav.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: https://api.sandbox.nav.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: https://www.nav.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: https://api-docs.nav.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: https://developer.nav.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: https://app.nav.com
+  catch_all: true
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    file: null
+    note: SPA shell (110250 bytes of HTML), not a document. Recorded as a MISS.
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: null
+    note: SPA shell. MISS.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: null
+    note: SPA shell. MISS.
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: null
+    note: SPA shell. MISS.
+  - path: /.well-known/api-catalog
+    status: 200
+    file: null
+    note: SPA shell. MISS.
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    file: null
+    note: SPA shell. MISS.
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: null
+    note: SPA shell. MISS — no A2A agent card exists.
+  - path: /.well-known/agent.json
+    status: 200
+    file: null
+    note: SPA shell (legacy pre-0.3 path). MISS.
+robots:
+  note: >-
+    Recorded here because it is the one machine-readable policy file Nav does serve, and it is
+    material to agent readiness.
+  probes:
+  - url: https://www.nav.com/robots.txt
+    status: 200
+    bytes: 418
+    summary: Marketing site permits crawling with AdsBot carve-outs.
+  - url: https://api-docs.nav.com/robots.txt
+    status: 200
+    bytes: 25
+    body: "User-agent: *\nDisallow: /"
+    finding: >-
+      Nav's ENTIRE developer documentation site is disallowed to every crawler. developer.nav.com
+      serves the identical directive. The API reference is public and human-readable but Nav's own
+      robots.txt tells every indexer and agent-facing crawler to stay out, so the docs are unlikely
+      to be present in the corpora agents retrieve from.
+  - url: https://api.nav.com/robots.txt
+    status: 404

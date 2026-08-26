@@ -1,0 +1,240 @@
+generated: '2026-08-26'
+method: derived
+source: https://api-docs.nav.com/docs/rest-api/partner-api
+derivation_note: >-
+  DERIVED from the request/response field tables Nav publishes in its Partner API reference, not
+  from an OpenAPI document — Nav publishes none. Every entity, field, type and enum below appears
+  verbatim in that reference; nothing is inferred beyond the has_one/belongs_to relationships,
+  which follow the documented object nesting.
+checked: '2026-08-26'
+identifier_conventions:
+  style: type-prefixed opaque string
+  prefixes:
+    acct_: Account
+    biz_: Business
+  examples: [acct_kEbVRwd8Dz, biz_kEbVRwd8Dz]
+entities:
+- name: Account
+  description: A Nav account, created for a partner's end user and bound to a partner relationship.
+  id_field: id
+  id_prefix: acct_
+  fields:
+  - name: id
+    type: string
+    description: Unique account identifier.
+  - name: activationStatus
+    type: ActivationStatus
+    description: Current activation status of the account.
+  - name: createdAt
+    type: string (RFC 3339)
+    description: Timestamp when the account was created.
+  input_fields:
+  - name: email
+    type: string
+    description: Account email address (must be a valid email format).
+  - name: planCode
+    type: string
+    description: Partner-specific plan code provided during onboarding.
+- name: Business
+  description: The legal business entity the account is for. Created alongside the Account.
+  id_field: id
+  id_prefix: biz_
+  fields:
+  - name: id
+    type: string
+  - name: name
+    type: string
+    description: Legal business name.
+  input_fields:
+  - name: name
+    type: string
+    required: true
+  - name: doingBusinessAs
+    type: string
+    description: DBA or trade name if different from the legal name.
+- name: AccountOwner
+  description: The natural person who owns the account. Embedded in the create-account request.
+  fields:
+  - name: name
+    type: ExternalPersonName
+  - name: contactInformation
+    type: ExternalPersonContactInformation
+- name: ExternalPersonName
+  fields:
+  - {name: givenName, type: string}
+  - {name: surname, type: string}
+- name: ExternalPersonContactInformation
+  fields:
+  - {name: phone, type: string, format: 'E.164, e.g. +14155551234; object form {"e164":"..."} also accepted'}
+  - {name: usAddress, type: ExternalUSAddress}
+- name: BusinessContactInformation
+  fields:
+  - {name: phone, type: string, format: E.164}
+  - {name: usAddress, type: NavUSAddress}
+  - {name: website, type: string, description: Business website URL}
+- name: USAddress
+  aliases: [ExternalUSAddress, NavUSAddress]
+  note: >-
+    Two distinct type names with identical documented field sets — ExternalUSAddress for the account
+    owner, NavUSAddress for the business. Recorded as one shape with two names because that is what
+    the reference publishes; a client cannot tell them apart from the docs.
+  fields:
+  - {name: city, type: string, required: true}
+  - {name: street, type: 'string[]', required: true, description: 1-2 street address lines}
+  - {name: state, type: StatesUSState, required: true}
+  - {name: zip, type: string, required: true, format: 12345 or 12345-6789}
+- name: BusinessIdentity
+  fields:
+  - {name: employerIdentificationNumber, type: string, format: '12-3456789', note: 'Do not send SSNs or TINs.'}
+  - {name: isIncorporated, type: boolean}
+  - {name: legalEntity, type: LegalEntity}
+- name: LegalEntity
+  fields:
+  - {name: type, type: LegalType}
+- name: BusinessIdentifiers
+  description: External bureau identifiers for the business.
+  fields:
+  - {name: dunsNumber, type: string, description: Dun & Bradstreet DUNS number}
+  - {name: employerIdentificationNumber, type: string}
+  - {name: equifaxId, type: string}
+  - {name: experianBin, type: string, description: Experian Business BIN}
+  note: >-
+    employerIdentificationNumber appears in BOTH BusinessIdentity and BusinessIdentifiers. The
+    reference does not say which wins if they disagree.
+- name: BusinessIndustry
+  fields:
+  - {name: naics, type: Naics}
+- name: Naics
+  fields:
+  - {name: code, type: string, description: 'NAICS industry code, 2-6 digits, e.g. "541511"'}
+- name: BusinessEmployment
+  fields:
+  - {name: numberOfEmployees, type: integer}
+- name: BusinessEstablishment
+  fields:
+  - {name: establishedOn, type: string, format: 'ISO 8601 YYYY-MM-DD; object form {"year":..,"month":..,"day":..} also accepted'}
+- name: CreditVisibility
+  description: Rolled-up bureau credit-visibility state for an account's business.
+  fields:
+  - {name: stage, type: CreditqualsVisibilityStage}
+  note: Returned by POST /v1/accounts/{accountId}/credit-visibility. No persistent id is exposed.
+- name: OriginAllowList
+  description: Partner-level list of browser origins permitted to embed Nav widgets.
+  fields:
+  - {name: originAllowList, type: 'string[]', description: 'Exact origins or single-level wildcards (https://*.example.com)'}
+  scope: per-partner (not per-account)
+- name: SsoToken
+  fields:
+  - {name: token, type: string}
+  - {name: expiresAtMillis, type: string (int64 epoch ms)}
+  lifetime_seconds: 120
+  single_use: true
+- name: SsoLoginUrl
+  fields:
+  - {name: loginUrl, type: string}
+  - {name: expiresAt, type: string (RFC 3339)}
+  lifetime_seconds: 120
+  single_use: true
+relationships:
+- from: Account
+  to: Business
+  kind: has_one
+  via: 'created together by POST /v1/accounts; both ids returned in the same response'
+- from: Account
+  to: AccountOwner
+  kind: has_one
+  via: accountOwner
+- from: Account
+  to: CreditVisibility
+  kind: has_one
+  via: 'POST /v1/accounts/{accountId}/credit-visibility (path accountId)'
+- from: Account
+  to: SsoToken
+  kind: has_many
+  via: 'accountId in POST /v1/sso-token body'
+- from: Account
+  to: SsoLoginUrl
+  kind: has_many
+  via: 'accountId in POST /v1/sso-login-url body'
+- from: Business
+  to: BusinessIdentity
+  kind: has_one
+  via: identity
+- from: Business
+  to: BusinessIdentifiers
+  kind: has_one
+  via: identifiers
+- from: Business
+  to: BusinessIndustry
+  kind: has_one
+  via: industry
+- from: Business
+  to: BusinessEmployment
+  kind: has_one
+  via: employment
+- from: Business
+  to: BusinessEstablishment
+  kind: has_one
+  via: establishment
+- from: Business
+  to: BusinessContactInformation
+  kind: has_one
+  via: contactInformation
+- from: BusinessIdentity
+  to: LegalEntity
+  kind: has_one
+  via: legalEntity
+- from: BusinessIndustry
+  to: Naics
+  kind: has_one
+  via: naics
+- from: AccountOwner
+  to: ExternalPersonName
+  kind: has_one
+  via: name
+- from: AccountOwner
+  to: ExternalPersonContactInformation
+  kind: has_one
+  via: contactInformation
+- from: OriginAllowList
+  to: Partner
+  kind: belongs_to
+  via: authenticated API key
+enums:
+- name: CreditqualsVisibilityStage
+  values:
+  - {value: new_business, description: 'Just starting out: at least one bureau does not yet have a locatable credit file.'}
+  - {value: foundation_ready, description: No bureau is healthy (scorable) yet, but a file has been located at every bureau.}
+  - {value: partial_visibility, description: Some bureaus have healthy files, others need work.}
+  - {value: full_visibility, description: All bureaus have healthy, established files.}
+- name: ActivationStatus
+  values:
+  - {value: active, description: Customer may use the account.}
+  - {value: deactivated_by_account_owner, description: Account owner deactivated the account; must reactivate before using.}
+  - {value: deactivated_by_organization, description: Organization owners deactivated this account; only they may reactivate it.}
+  - {value: anonymized, description: 'Account has been anonymized and is permanently unusable. Create a new account.', terminal: true}
+  - {value: disabled_by_admin, description: 'Customer service has disabled the account; cannot be reactivated.', terminal: true}
+- name: EndedReason
+  values:
+  - {value: other, description: Other reason not covered below.}
+  - {value: non_payment, description: Customer non-payment to partner (failed payment, expired card, other billing issues).}
+  - {value: contract_ended, description: "Customer's contract with partner ended (contract expired, project completed)."}
+  - {value: subscription_canceled, description: "Customer's subscription canceled with partner."}
+- name: LegalType
+  values: [sole_proprietorship, llc, partnership, c_corporation, s_corporation, benefit_corporation,
+    close_corporation, nonprofit_corporation, cooperative]
+- name: StatesUSState
+  cardinality: 57
+  values_note: >-
+    Two-letter USPS codes for the 50 states, DC, and 6 territories (AS American Samoa, FM Federated
+    States of Micronesia, GU Guam, MH Marshall Islands, MP Northern Mariana Islands, PW Palau, PR
+    Puerto Rico, VI U.S. Virgin Islands).
+  domain: US-only
+domain_notes:
+  us_only: >-
+    The address model, state enum, EIN, DUNS, NAICS and the four bureaus (D&B, Experian, Equifax,
+    SBFE/TransUnion) make this a US-only data model with no internationalisation surface.
+  pii_sensitivity: >-
+    Account creation carries a natural person's name, phone and mailing address plus a business EIN.
+    Nav explicitly instructs "Do not send SSNs or TINs" in the employerIdentificationNumber field
+    description — an unusually direct guardrail worth surfacing to any agent constructing this body.

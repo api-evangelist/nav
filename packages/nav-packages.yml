@@ -1,0 +1,136 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  Registry sweeps of npm (registry.npmjs.org search + per-package metadata), PyPI, RubyGems,
+  crates.io, NuGet, pkg.go.dev and Maven Central, plus the Nav developer docs at
+  https://api-docs.nav.com/docs/widgets/getting-started (which names the package and the install
+  command verbatim) and https://api-docs.nav.com/docs/deprecated/embedded-widget/.
+checked: '2026-08-26'
+summary:
+  first_party_sdk_count: 1
+  first_party_deprecated_count: 1
+  rest_api_client_libraries: 0
+  note: >-
+    Nav ships ONE first-party client library and it is a browser widget SDK, not a REST API client.
+    There is no Node, Python, Ruby, Go, Java, PHP, .NET or Rust client for the Nav Partner API in any
+    public registry — the docs show the Partner API being called with raw `fetch`. The npm scope
+    @navinc is Nav's own (published packages carry Nav descriptions and the private
+    github.com/nav-inc/typescript monorepo as their repository), but almost everything in it is
+    internal tooling (eslint/prettier configs, a CSpell dictionary, test helpers, a React pattern
+    library) rather than an integration surface, so only the two genuinely consumer-facing packages
+    are recorded as packages below.
+github_organization:
+  found: false
+  checked: '2026-08-26'
+  probes:
+  - url: https://api.github.com/orgs/nav-inc
+    status: 404
+  - url: https://api.github.com/repos/nav-inc/typescript
+    status: 404
+  note: >-
+    The repository field on every @navinc npm package points at git@github.com:nav-inc/typescript,
+    a PRIVATE monorepo. No public GitHub organization is published, so NO GitHubOrganization pointer
+    is emitted.
+packages:
+- language: javascript
+  registry: npm
+  name: '@navinc/widget-sdk'
+  url: https://www.npmjs.com/package/@navinc/widget-sdk
+  install: npm install @navinc/widget-sdk
+  official: true
+  version: 0.3.2
+  published: '2026-07-17'
+  description: >-
+    Nav embeddable widget SDK. Registers the <nav-credit-widget> custom element, handles the
+    cross-origin iframe session exchange, and ships TypeScript declarations. Imported once at the
+    application entry point.
+  repository: https://github.com/nav-inc/typescript/tree/main/packages/widget-sdk
+  repository_public: false
+  surface: components/nav-components.yml
+  version_history:
+  - version: 0.1.1
+  - version: 0.2.0
+  - version: 0.3.0
+  - version: 0.3.1
+  - version: 0.3.2
+  currency_note: >-
+    Latest release 0.3.2 (2026-07-17) is ~5 weeks old at the time of this pass — current, and the
+    only actively-released package in the @navinc scope. Still pre-1.0.
+- language: javascript
+  registry: cdn
+  name: '@navinc/widget-sdk (unpkg)'
+  url: https://unpkg.com/@navinc/widget-sdk
+  install: '<script src="https://unpkg.com/@navinc/widget-sdk@VERSION/dist/index.js"></script>'
+  official: true
+  version: null
+  published: null
+  currency_note: >-
+    The docs describe the CDN option as "available via public CDNs such as unpkg. Replace VERSION in
+    the URL with the version you want to pin to" — Nav publishes no canonical pinned CDN URL of its
+    own, so there is no single distribution to read a version from. version/published recorded as
+    null deliberately: checked, nothing pinned to record. jsDelivr metadata
+    (data.jsdelivr.com/v1/packages/npm/@navinc/widget-sdk) resolves the same npm package at 0.3.2.
+  note: >-
+    Same artifact as the npm package, delivered by CDN for partners without a bundler.
+deprecated_packages:
+- language: javascript
+  registry: npm
+  name: '@navinc/cta-widget'
+  url: https://www.npmjs.com/package/@navinc/cta-widget
+  official: true
+  version: 1.5.0
+  published: '2023-04-12'
+  status: deprecated
+  description: >-
+    The original Nav Embedded CTA Widget, delivered via npm and running in the partner's own
+    JavaScript context. Superseded by the cross-origin iframe widget system in @navinc/widget-sdk;
+    Nav's own docs mark the integration pattern Deprecated.
+  currency_note: >-
+    Last published 2023-04-12 — 3 years 4 months stale. Consistent with Nav's published statement
+    that this integration path is superseded, so the staleness is a documented sunset rather than
+    silent abandonment.
+internal_scope_packages:
+  note: >-
+    Also present under the @navinc npm scope but NOT integration surfaces — recorded so a later pass
+    does not mistake them for SDKs.
+  packages:
+  - name: '@navinc/base-react-components'
+    version: 24.8.0
+    published: '2025-07-17'
+    kind: internal pattern library
+  - name: '@navinc/reports'
+    version: 33.0.0
+    published: '2025-06-17'
+    kind: internal web app module
+  - name: '@navinc/marketplace-web'
+    version: 39.0.0
+    published: '2025-06-17'
+    kind: internal web app module
+  - name: '@navinc/utils'
+    version: 10.1.4
+    published: '2025-06-02'
+    kind: internal utilities
+  - name: '@navinc/test-helpers'
+    version: 0.4.1
+    published: '2024-12-18'
+    kind: internal test tooling
+  - name: '@navinc/eslint-config'
+    version: 1.4.0
+    published: '2024-12-10'
+    kind: internal lint config
+  - name: '@navinc/prettier-config'
+    version: 1.3.0
+    published: '2025-06-12'
+    kind: internal format config
+  - name: '@navinc/dict-nav'
+    version: 0.2.0
+    published: '2024-07-10'
+    kind: internal CSpell dictionary
+registries_checked:
+  npm: '@navinc scope enumerated via registry search (13 packages)'
+  pypi: no Nav Technologies client library
+  rubygems: none
+  crates_io: none
+  nuget: none
+  pkg_go_dev: none
+  maven_central: none

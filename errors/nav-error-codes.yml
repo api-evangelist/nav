@@ -1,0 +1,73 @@
+generated: '2026-08-26'
+method: searched
+source: https://api-docs.nav.com/docs/widgets/reference/error-codes
+docs: https://api-docs.nav.com/docs/widgets/error-handling
+checked: '2026-08-26'
+summary: >-
+  Nav publishes a complete, remediation-bearing error-code registry for its EMBEDDED WIDGET surface.
+  Codes arrive in the `code` field of the navWidgetError CustomEvent detail, alongside a
+  human-readable `message`. The widget has already been destroyed by the time the event fires, so
+  every code below is terminal for that widget instance. This is the non-payments sibling of a
+  decline-code catalog; it is a stronger error surface than the REST API's, which has no
+  consolidated reference at all.
+surface: '<nav-credit-widget> custom element (@navinc/widget-sdk)'
+delivery:
+  event: navWidgetError
+  bubbles: true
+  detail:
+    code: string — one of the codes below
+    message: string — human-readable description
+error_codes:
+- code: LOAD_TIMEOUT
+  source: SDK
+  cause: >-
+    The iframe did not send a ready signal within 10 seconds. The base-url may be unreachable, or
+    the browser blocked the iframe.
+  resolution: >-
+    Verify base-url is correct and that frame-src in your CSP allows Nav's origin. Check the browser
+    console for iframe-related errors.
+  timeout_seconds: 10
+- code: NAVIGATION_FAILED
+  source: SDK
+  cause: >-
+    A full-page navigation inside the widget did not complete within 10 seconds (no ready signal
+    after navigation began). Can indicate a network error or a blocked navigation.
+  resolution: Check for network errors in the browser console. If it persists, contact Nav.
+  timeout_seconds: 10
+- code: TOKEN_REQUEST_TIMEOUT
+  source: SDK
+  cause: provideToken() was not called within 10 seconds of navWidgetTokenRequest.
+  resolution: >-
+    Ensure the navWidgetTokenRequest handler fetches a token and calls provideToken() promptly. If
+    the user is unauthenticated, remove the widget element rather than leaving the event pending.
+  timeout_seconds: 10
+- code: SESSION_ERROR
+  source: iframe
+  cause: The session exchange failed. The init token may be invalid, expired, or already used.
+  resolution: >-
+    Issue a fresh init token for each request — init tokens are single-use, do not reuse a cached
+    token. Check that accountId is correct and the API key is valid.
+- code: VERSION_MISMATCH
+  source: SDK or iframe
+  cause: The SDK and iframe are running incompatible protocol versions.
+  resolution: >-
+    Update the SDK to the latest version (npm update @navinc/widget-sdk, or update the CDN pin). If
+    it persists, contact Nav.
+- code: SDK_VERSION_TOO_OLD
+  source: iframe (HTTP 426)
+  cause: The SDK version is below the minimum required by Nav's server.
+  resolution: >-
+    Upgrade the SDK. Nav states it notifies partners before raising the minimum version requirement.
+  http_status: 426
+- code: SCORE_ERROR
+  source: iframe
+  cause: The score data fetch failed after a successful session. Typically a transient Nav backend issue.
+  resolution: Usually self-correcting. If it persists, check Nav's status page or contact support.
+  status_page: https://status.nav.com/
+notes:
+  timeout_uniformity: >-
+    Every SDK-side timeout is 10 seconds. An agent or host page integrating the widget should not
+    expect a slower path to succeed.
+  terminality: >-
+    "Fired when the widget encounters a terminal error. The widget has already been destroyed at
+    this point." Recovery means re-mounting the element, not retrying in place.

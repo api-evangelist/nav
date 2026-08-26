@@ -1,0 +1,105 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://api-docs.nav.com/docs/widgets/overview +
+  https://api-docs.nav.com/docs/widgets/getting-started +
+  https://api-docs.nav.com/docs/widgets/reference/custom-element +
+  https://api-docs.nav.com/docs/widgets/token-delivery
+checked: '2026-08-26'
+summary: >-
+  Nav ships an embeddable client-side UI surface as W3C custom elements delivered by the
+  @navinc/widget-sdk npm package (or a CDN script tag). It is architecturally distinct from an SDK:
+  the partner does not call Nav from the browser at all. The element mounts a cross-origin iframe
+  hosted on app.nav.com, and the ONLY thing that crosses from the partner's page into it is a
+  single-use init token minted server-side. Nav states the design goal explicitly — Nav data never
+  enters the partner's JavaScript context, giving browser-enforced data isolation "without
+  requiring partner cooperation".
+delivery:
+- kind: npm
+  package: '@navinc/widget-sdk'
+  install: npm install @navinc/widget-sdk
+  usage: "import '@navinc/widget-sdk'  // once, at the application entry point"
+  typescript: >-
+    Ships type declarations. JSX attribute checking via
+    `declare global { interface HTMLElementTagNameMap { 'nav-credit-widget': import('@navinc/widget-sdk').NavCreditWidget } }`
+- kind: cdn
+  provider: 'public CDNs such as unpkg'
+  usage: 'Script tag with an explicit VERSION segment — Nav instructs partners to pin.'
+  note: Offered for partners without a bundler. No canonical pinned URL is published by Nav.
+families:
+- family: Credit
+  components:
+  - tag: nav-credit-widget
+    name: Business Credit Score
+    shows: >-
+      Business credit scores from connected bureaus — Dun & Bradstreet, Equifax, Experian and SBFE.
+    attributes:
+    - name: base-url
+      required: false
+      default: https://app.nav.com
+      description: The Nav application origin for the target environment (sandbox is https://app.sandbox.nav.com).
+    - name: token
+      required: false
+      description: >-
+        An init token to use at mount time. If omitted the element fires navWidgetTokenRequest to
+        ask for one.
+    - name: link-click
+      required: false
+      values: ['delegate']
+      description: >-
+        Set to "delegate" to hand navigable link clicks to the host page instead of opening a new
+        tab; the element then fires navWidgetLinkClick with a `path` in event.detail.
+    methods:
+    - signature: 'provideToken(token: string): void'
+      description: >-
+        Delivers an init token to the widget. Called from a navWidgetTokenRequest handler, or to
+        start a session after mount when no token attribute was set. An invalid token fails the
+        session exchange with SESSION_ERROR.
+    events:
+    - name: navWidgetTokenRequest
+      bubbles: true
+      detail: empty
+      fired_when: >-
+        The widget needs an init token — at initial mount (when no token attribute is set) and when
+        the session expires and cannot be silently renewed.
+      deadline: provideToken() must be called within 10 seconds or TOKEN_REQUEST_TIMEOUT fires.
+    - name: navWidgetReady
+      bubbles: true
+      detail: empty
+      fired_when: The widget has loaded data and become visible to the user.
+    - name: navWidgetError
+      bubbles: true
+      detail: '{ code: string, message: string }'
+      fired_when: A terminal error occurred. The widget has already been destroyed.
+      see: errors/nav-error-codes.yml
+    - name: navWidgetLinkClick
+      bubbles: true
+      detail: '{ path: string }'
+      fired_when: >-
+        link-click="delegate" is set and the user clicks a navigable link into a bureau report page.
+    sizing:
+      width: always 100% of the containing element
+      height: self-managed; starts hidden and becomes visible after navWidgetReady, then adjusts to content
+    forward_looking: >-
+      "More widget types are on the way. Once you have the first one integrated, adding others
+      requires no additional setup on your end."
+prerequisites:
+- A Nav partner agreement with widget access enabled
+- The partner site's origin registered with Nav (GET/PUT /v1/origins)
+- A server-side partner API key
+security_model:
+  isolation: cross-origin iframe on app.nav.com
+  api_key_in_browser: forbidden — "The API key must never appear in browser code."
+  token_lifetime_seconds: 120
+  token_single_use: true
+  origin_allow_list:
+    managed_by: GET /v1/origins, PUT /v1/origins
+    entry_forms: [exact origin, single-level wildcard]
+    wildcard_semantics: >-
+      https://*.example.com matches https://app.example.com but NOT https://deep.app.example.com.
+  csp_requirement: >-
+    The host page's CSP frame-src must allow Nav's origin, or the widget fails with LOAD_TIMEOUT.
+  version_floor: Server rejects SDK versions below the minimum with HTTP 426 (SDK_VERSION_TOO_OLD).
+event_listener_note: >-
+  All widget events bubble, so a single listener on a parent element handles multiple widget
+  instances.

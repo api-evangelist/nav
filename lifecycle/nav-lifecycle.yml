@@ -1,0 +1,136 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://api-docs.nav.com/docs/deprecated/ + https://api-docs.nav.com/docs/deprecated/graphql-schema
+  + https://api-docs.nav.com/docs/deprecated/embedded-widget/ + https://status.nav.com/ +
+  https://www.nav.com/terms/ + https://api-docs.nav.com/docs/rest-api/guides/base-url
+checked: '2026-08-26'
+versioning:
+  scheme: path-prefix
+  current: v1
+  declared_in_reference: 'Version: v1'
+  policy_documented: false
+  notes: >-
+    Every operation sits under /v1 and the Partner API reference declares "Version: v1". Nav
+    publishes no policy describing what a version bump means, how long v1 is supported, or what
+    counts as a breaking change. There is no version header and no date-pinned version.
+deprecation:
+  policy_documented: false
+  practice_documented: true
+  rfc8594_sunset_headers: false
+  deprecated_surfaces_published: true
+  notes: >-
+    Nav has no written deprecation POLICY (no notice period, no sunset date, no Deprecation/Sunset
+    headers), but it does something better than most providers in its band: it maintains a permanent,
+    navigable "Deprecated" section of the developer docs that keeps every superseded integration
+    guide online, states plainly which surface replaces it, and explains WHY. That is a real,
+    published deprecation posture and it is why a Deprecation pointer is emitted.
+  deprecated_surfaces:
+  - name: GraphQL API
+    replaced_by: Nav Partner REST API (/v1)
+    statement: >-
+      "The GraphQL API is no longer the recommended integration path... The GraphQL API remains
+      operational for existing integrations but will not receive new features."
+    documented_endpoints:
+      production: https://api.nav.com/partners/graphql
+      sandbox: https://api.sandbox.nav.com/partners/graphql
+    probe:
+    - url: https://api.nav.com/partners/graphql
+      method: POST introspection
+      status: 404
+      checked: '2026-08-26'
+    - url: https://api.sandbox.nav.com/partners/graphql
+      method: POST introspection
+      status: 503
+      checked: '2026-08-26'
+    finding: >-
+      The production GraphQL endpoint Nav's own deprecated-docs page names returned HTTP 404 to an
+      unauthenticated POST and the sandbox returned 503. Neither is proof the surface is gone — an
+      edge that hides an unauthenticated caller behind a 404 is common — but the documentation says
+      "remains operational" while the documented URL does not answer, which is a contradiction worth
+      recording. No SDL was captured; Nav states the schema reference is generated on demand by
+      introspecting the live API and is deliberately not checked into the docs repository.
+    docs: https://api-docs.nav.com/docs/deprecated/graphql-schema
+  - name: Embedded CTA Widget (@navinc/cta-widget)
+    replaced_by: Cross-origin iframe widget system (@navinc/widget-sdk, <nav-credit-widget>)
+    statement: >-
+      "This widget is superseded by the new iframe-based Widget Integration, which provides stronger
+      data isolation, a simpler integration model, and active development."
+    rationale_published: >-
+      "The legacy widget ran in the partner's JavaScript context, meaning Nav data passed through the
+      partner's page. The new widget system uses a cross-origin iframe to ensure Nav data never
+      enters the partner's JS context."
+    migration_path: https://api-docs.nav.com/docs/widgets/getting-started
+    last_package_release: '2023-04-12'
+    docs: https://api-docs.nav.com/docs/deprecated/embedded-widget/
+  - name: Call to Action
+    replaced_by: Widget Integration
+    docs: https://api-docs.nav.com/docs/deprecated/call-to-action/
+  - name: Embedded Finance Application
+    replaced_by: Widget Integration
+    docs: https://api-docs.nav.com/docs/deprecated/embedded-finance-application
+  - name: Embedded Credit Reports
+    replaced_by: Widget Integration
+    docs: https://api-docs.nav.com/docs/deprecated/embedded-credit-reports
+  - name: Send User to Nav
+    replaced_by: POST /v1/sso-login-url
+    docs: https://api-docs.nav.com/docs/deprecated/send-user-to-nav
+  - name: Email Campaigns
+    replaced_by: null
+    docs: https://api-docs.nav.com/docs/deprecated/email-campaigns
+  - name: Nav User Account (GraphQL)
+    replaced_by: POST /v1/accounts and GET /v1/accounts/{accountId}
+    docs: https://api-docs.nav.com/docs/deprecated/nav-user-account/
+  client_version_floor:
+    surface: '@navinc/widget-sdk'
+    mechanism: >-
+      Nav enforces a minimum client version server-side and rejects older SDKs with HTTP 426, which
+      the SDK surfaces as SDK_VERSION_TOO_OLD.
+    notice_commitment: >-
+      "Nav will have notified you before raising the minimum version requirement." A stated advance-notice
+      commitment, though with no named notice period.
+    source: https://api-docs.nav.com/docs/widgets/reference/error-codes
+status_page:
+  url: https://status.nav.com/
+  provider: Uptime.com
+  status: 200
+  machine_readable_api: false
+  checked: '2026-08-26'
+  note: >-
+    Hosted on Uptime.com. The page renders client-side, so component-level state is not machine
+    readable the way an Atlassian Statuspage /api/v2/summary.json would be. Nav's own widget error
+    reference points partners at it for SCORE_ERROR triage, so it is a live, referenced operational
+    surface.
+changelog:
+  published: false
+  probes:
+  - url: https://api-docs.nav.com/changelog
+    status: 404
+  - url: https://api-docs.nav.com/docs/changelog
+    status: 404
+  note: >-
+    No API changelog or release notes are published. Version history for the one shipped client
+    library is readable only from npm (@navinc/widget-sdk: 0.1.1 -> 0.3.2 across five releases,
+    latest 2026-07-17). No ChangeLog artifact or pointer is emitted.
+sla:
+  documented: false
+  note: No public uptime or support SLA. Support runs through the partner's Nav account manager.
+roadmap:
+  published: false
+  forward_statement: >-
+    "More widget types are on the way. Once you have the first one integrated, adding others
+    requires no additional setup on your end." A direction, not a dated roadmap. No Roadmap pointer
+    is emitted.
+terms:
+  url: https://www.nav.com/terms/
+  status: 200
+  privacy: https://www.nav.com/privacy/
+  ccpa_request: https://www.nav.com/privacy/ccpa-request/
+  note: >-
+    Consumer terms for nav.com. The partner/API agreement is a private contract and is not published.
+support:
+  help_center: https://help.nav.com/en/
+  contact: https://www.nav.com/contact/
+  api_support_channel: >-
+    The API docs route every escalation to "your Nav account manager" or "contact Nav". There is no
+    developer support portal, forum, or public issue tracker.

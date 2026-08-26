@@ -1,0 +1,51 @@
+generated: '2026-08-26'
+method: searched
+source: https://api-docs.nav.com/docs/rest-api/guides/rate-limiting
+checked: '2026-08-26'
+confidence: high
+confidence_note: >-
+  Nav's rate-limiting guide is server-rendered HTML that this pipeline captured verbatim — the
+  numbers, header names and 429 body below are transcribed, not inferred. Not observed on a live
+  429: the API is partner-gated and every unauthenticated request 404s or 401s before the limiter
+  is reached.
+limit_count: 1
+scopes:
+- scope: per-key
+  surface: REST (https://api.nav.com/v1, https://api.sandbox.nav.com/v1)
+  window: 1 second
+  limit: 10
+  unit: requests
+  burst: null
+  status_on_exhaustion: 429
+  exhaustion_body: '{"message": "Rate limit exceeded"}'
+  headers:
+  - name: X-RateLimit-Limit
+    meaning: Maximum number of requests allowed per second.
+    on: all responses
+  - name: X-RateLimit-Remaining
+    meaning: Number of requests remaining in the current window.
+    on: all responses
+  - name: X-RateLimit-Reset
+    meaning: Unix timestamp when the rate limit window resets.
+    on: all responses
+  retry_after: null
+  retry_after_note: >-
+    No Retry-After header is documented. Nav's stated guidance is "Wait until the time specified in
+    X-RateLimit-Reset before retrying." With a one-second window, an agent should sleep to the
+    X-RateLimit-Reset epoch and then retry, with exponential backoff on repeated 429s.
+  documented_statement: '"10 requests per second per API key"'
+  source: https://api-docs.nav.com/docs/rest-api/guides/rate-limiting
+quotas:
+  documented: false
+  note: >-
+    No monthly call quota, no per-operation quota, no account-creation cap and no overage price is
+    published. Commercial terms are set in the partner agreement, which is not public.
+agent_notes:
+  headers_on_every_response: >-
+    Nav returns the rate-limit triple on ALL responses, not only on 429s, so an agent can pace
+    itself without provoking a rejection. That is the runtime signal that matters and Nav publishes
+    it.
+  practical_ceiling: >-
+    10 req/s per key against a partner-wide key means the limit is shared across every one of the
+    partner's users. A platform onboarding a batch of businesses via POST /v1/accounts is the
+    workload most likely to hit it.

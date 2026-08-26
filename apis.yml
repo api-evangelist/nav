@@ -1,23 +1,142 @@
 aid: nav
 name: Nav
-description: 'Nav is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Nav Technologies, Inc. is a US financial-technology company (not a bank) that gives small business
+  owners one place to see their business and personal credit, cash-flow health and funding
+  eligibility, then matches them to a marketplace of financing and business credit card offers.
+  Consumer-facing products are Nav Prime (business credit building with tradelines, five bureau
+  scores from D&B, Experian, Equifax and TransUnion, bookkeeping and a FICO SBSS score), the Nav
+  Credit Builder Card and a mobile app. The developer surface is the Nav Partner API — a REST API
+  at api.nav.com used by embedded-finance platforms to create Nav accounts, change plans, end a
+  partner relationship, resolve bureau credit visibility and mint single-use SSO tokens — together
+  with the @navinc/widget-sdk embeddable widget SDK, which renders Nav business-credit UI inside a
+  partner's own application as the <nav-credit-widget> custom element. Access is partner-gated:
+  API keys are issued during onboarding and there is no self-serve developer signup.
+image: https://api-docs.nav.com/img/nav-logo-on-light.svg
 url: https://raw.githubusercontent.com/api-evangelist/nav/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
 specificationVersion: '0.20'
 created: '2026-08-26'
 modified: '2026-08-26'
 tags:
-- Company
-apis: []
+- Business Credit
+- Small Business
+- Financial Services
+- Embedded Finance
+- Lending
+- Credit Scores
+- Credit Reporting
+- Financing Marketplace
+- Fintech
+- Partner API
+apis:
+- name: Nav Partner API
+  description: >-
+    REST API for Nav partner integrations. Partners authenticate with a Bearer token API key issued
+    during onboarding and use it to create Nav accounts for their users, fetch account state, change
+    an account's plan, end the partner relationship, resolve rolled-up bureau credit visibility for
+    an account's business, manage the widget origin allow list, and mint single-use SSO tokens and
+    login URLs (2-minute expiry) that hand a user into Nav or into an embedded Nav widget. Nine
+    documented operations under /v1 with a matching sandbox environment. Nav publishes no
+    machine-readable OpenAPI description of this API; the reference is hand-authored documentation.
+  humanURL: https://api-docs.nav.com/docs/rest-api/partner-api
+  baseURL: https://api.nav.com
+  tags:
+  - Business Credit
+  - Embedded Finance
+  - Partner API
+  - Accounts
+  - SSO
+  properties:
+  - type: Documentation
+    url: https://api-docs.nav.com/docs/guides/intro
+  - type: APIReference
+    url: https://api-docs.nav.com/docs/rest-api/partner-api
+  - type: Authentication
+    url: authentication/nav-authentication.yml
+  - type: Conventions
+    url: conventions/nav-conventions.yml
+  - type: Idempotency
+    url: conventions/nav-conventions.yml
+  - type: DataModel
+    url: data-model/nav-data-model.yml
+  - type: ErrorCatalog
+    url: errors/nav-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/nav-rate-limits.yml
+  - type: Sandbox
+    url: sandbox/nav-sandbox.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: DomainSecurity
+  url: security/nav-domain-security.yml
 - type: Website
-  url: https://forgeglobal.com/nav_stock/
+  url: https://www.nav.com/
+- type: DeveloperPortal
+  url: https://api-docs.nav.com/
+- type: Documentation
+  url: https://api-docs.nav.com/docs/guides/intro
+- type: APIReference
+  url: https://api-docs.nav.com/docs/rest-api/partner-api
+- type: GettingStarted
+  url: https://api-docs.nav.com/docs/widgets/getting-started
+- type: Support
+  url: https://help.nav.com/en/
+- type: Blog
+  url: https://www.nav.com/blog/
+- type: Pricing
+  url: https://www.nav.com/nav-prime/
+- type: SignUp
+  url: https://app.nav.com/registration/
+- type: Login
+  url: https://app.nav.com/login/
+- type: TermsOfService
+  url: https://www.nav.com/terms/
+- type: PrivacyPolicy
+  url: https://www.nav.com/privacy/
+- type: StatusPage
+  url: https://status.nav.com/
+- type: Deprecation
+  url: lifecycle/nav-lifecycle.yml
+- type: Lifecycle
+  url: lifecycle/nav-lifecycle.yml
+- type: Packages
+  url: packages/nav-packages.yml
+- type: SDKs
+  url: packages/nav-packages.yml
+- type: Components
+  url: components/nav-components.yml
+- type: Conformance
+  url: conformance/nav-conformance.yml
+- type: Plans
+  url: plans/nav-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/nav-rate-limits.yml
+- type: Sandbox
+  url: sandbox/nav-sandbox.yml
+- type: Conventions
+  url: conventions/nav-conventions.yml
+- type: Idempotency
+  url: conventions/nav-conventions.yml
+- type: Authentication
+  url: authentication/nav-authentication.yml
+- type: ErrorCatalog
+  url: errors/nav-problem-types.yml
+- type: ErrorCatalog
+  url: errors/nav-error-codes.yml
+- type: DataModel
+  url: data-model/nav-data-model.yml
+- type: MCPServer
+  url: mcp/nav-mcp.yml
+- type: LLMsTxt
+  url: llms/nav-llms.txt
+x-enrichment:
+  date: '2026-08-26'
+  status: enriched
+  artifacts_added: 16
+  pass: local-v1

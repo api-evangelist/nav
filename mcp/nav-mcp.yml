@@ -1,0 +1,106 @@
+generated: '2026-08-26'
+method: derived
+status: candidate
+source: https://api-docs.nav.com/docs/rest-api/partner-api
+checked: '2026-08-26'
+summary: >-
+  Nav publishes NO Model Context Protocol server — hosted or stdio. The tool list below is a
+  CANDIDATE derived from the nine operations Nav documents in its Partner API reference, offered as
+  a proposal for an agent-facing surface. It is not published by Nav and no endpoint below is
+  callable.
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: api-key
+  verified: probed
+  auth_note: >-
+    Recorded as api-key because that is what any Nav MCP surface would have to carry (Bearer partner
+    API key). There is no server, so nothing was authenticated.
+search_result:
+  official_hosted_server: none
+  official_stdio_package: none
+  probes:
+  - url: https://mcp.nav.com/mcp
+    method: POST tools/list
+    status: 0
+    note: host does not resolve
+  - url: https://api.nav.com/mcp
+    method: POST tools/list
+    status: 404
+  - url: https://api-docs.nav.com/mcp
+    method: POST tools/list
+    status: 404
+    body: '{"error":{"code":"not_found","message":"The requested path could not be found"}}'
+  - url: https://nav.com/mcp
+    method: POST tools/list
+    status: 301
+    note: redirect to www; no MCP surface
+  registry_checks:
+    npm_navinc_scope: >-
+      All 13 packages under the @navinc npm scope enumerated 2026-08-26; none is an MCP server.
+    modelcontextprotocol_scope: no Nav server published
+  docs_mentions_mcp: false
+  third_party: []
+server: null
+transport: null
+auth:
+  type: apiKey
+  header: Authorization
+  scheme: Bearer
+candidate_tools:
+- name: create_nav_account
+  description: Create a Nav account and establish a partner relationship for a small business.
+  maps_to: POST /v1/accounts
+  consequence: write — creates a durable account and business record
+  idempotent: true
+  idempotency_key: Idempotency-Key (24h retention)
+- name: get_nav_account
+  description: Return account information (id, activationStatus, createdAt) for a Nav account id.
+  maps_to: GET /v1/accounts/{accountId}
+  consequence: read
+- name: end_partner_relationship
+  description: End a customer's relationship with the partner, optionally backdated, with a reason.
+  maps_to: DELETE /v1/accounts/{accountId}
+  consequence: write — reversible only by creating a new relationship
+  idempotent: true
+  note: Succeeds if the relationship does not exist or is already ended.
+- name: change_account_plan
+  description: Change an account to another plan code owned by the partner.
+  maps_to: PUT /v1/accounts/{accountId}/plan
+  consequence: write — billing-affecting
+- name: resolve_credit_visibility
+  description: >-
+    Run bureau matching for the account's business and return the rolled-up credit-visibility stage.
+  maps_to: POST /v1/accounts/{accountId}/credit-visibility
+  consequence: write — auto-confirms high-confidence bureau matches with no user interaction; NOT reversible
+  agent_gate: recommended human-in-the-loop
+- name: get_origin_allow_list
+  description: Return the browser origin allow list configured for the partner.
+  maps_to: GET /v1/origins
+  consequence: read
+- name: replace_origin_allow_list
+  description: Replace the entire browser origin allow list for the partner.
+  maps_to: PUT /v1/origins
+  consequence: write — partner-wide; a bad value breaks widget embedding for every customer
+  agent_gate: recommended human-in-the-loop
+- name: create_sso_login_url
+  description: Generate a single-use SSO login URL for a Nav account (expires in 2 minutes).
+  maps_to: POST /v1/sso-login-url
+  consequence: write — mints a credential
+- name: create_sso_token
+  description: Create a single-use SSO init token for a Nav account (expires in 2 minutes).
+  maps_to: POST /v1/sso-token
+  consequence: write — mints a credential
+candidate_note: >-
+  Input schemas are NOT included. Nav publishes no OpenAPI, so there is no machine-readable
+  parameter contract to inherit — the request bodies are documented only as HTML field tables.
+  Anyone building this server should transcribe them from
+  data-model/nav-data-model.yml, which captures those tables faithfully, and validate against the
+  live API with X-Strict-Validation: true (see conventions/nav-conventions.yml).
+tool_crosswalk_not_emitted: >-
+  mcp/nav-tool-crosswalk.yml is NOT written. A crosswalk binds MCP tools to OpenAPI operationIds so
+  a tool inherits a real inputSchema; with no OpenAPI and no MCP server there is nothing on either
+  side to bind, and the mapping above (tool name -> documented HTTP method + path) already carries
+  everything a crosswalk could honestly say.

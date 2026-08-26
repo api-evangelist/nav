@@ -1,0 +1,85 @@
+generated: '2026-08-26'
+method: searched
+source: https://api-docs.nav.com/docs/rest-api/auth/partner-api-key
+docs: https://api-docs.nav.com/docs/rest-api/auth/partner-api-key
+checked: '2026-08-26'
+derivation_note: >-
+  Not derived by derive-authentication.py — Nav publishes no OpenAPI, so there are no
+  securitySchemes to read. Every field below is transcribed from the published authentication and
+  widget documentation.
+summary:
+  types: [apiKey]
+  api_key_in: [header]
+  oauth2_flows: []
+  openid_connect: false
+  mutual_tls: false
+  self_serve_credentials: false
+schemes:
+- name: PartnerApiKey
+  type: apiKey
+  in: header
+  parameter_name: Authorization
+  scheme_note: >-
+    Documented as `Type: apiKey`, `Header: Authorization` with the value `Bearer <api_key>`. It is a
+    static bearer token, not an OAuth 2.0 access token — there is no authorization server, no token
+    endpoint, no scopes and no refresh.
+  example_header: 'Authorization: Bearer <api_key>'
+  applies_to: All nine Nav Partner API operations under https://api.nav.com/v1
+  provisioning: >-
+    "API keys are provisioned by Nav during partner onboarding. Contact your Nav account manager to
+    obtain, rotate, or revoke a key." There is no developer console, no self-serve key issuance and
+    no documented programmatic rotation.
+  rotation: manual, via Nav account manager
+  errors:
+  - status: 401
+    meaning: API key is missing or invalid.
+  - status: 403
+    meaning: API key is valid but the operation is not permitted for this partner.
+  source: https://api-docs.nav.com/docs/rest-api/auth/partner-api-key
+- name: PartnerApiKeyLegacyGraphQL
+  type: apiKey
+  in: header
+  parameter_name: x-api-key
+  status: deprecated
+  scheme_note: >-
+    The deprecated GraphQL API used a different scheme: `x-api-key` plus an `x-partner-id` header.
+    Recorded for partners still on the legacy integration; the GraphQL endpoint documented at
+    https://api.nav.com/partners/graphql returned HTTP 404 when probed 2026-08-26 and the sandbox
+    equivalent returned 503.
+  additional_headers:
+  - name: x-partner-id
+    description: Partner ID, provided by Nav.
+  source: https://api-docs.nav.com/docs/deprecated/graphql-schema
+browser_session_model:
+  name: Widget init token
+  kind: single-use bearer token, browser-delivered
+  minted_by: POST /v1/sso-token (server-side, with the partner API key)
+  lifetime_seconds: 120
+  single_use: true
+  delivery: >-
+    The partner's own backend authenticates its user, calls POST /v1/sso-token with that user's Nav
+    accountId, and returns ONLY the token to the browser. The token is passed to the
+    <nav-credit-widget> custom element via the `token` attribute or provideToken() in response to
+    the navWidgetTokenRequest event.
+  hard_rule_from_docs: >-
+    "The API key must never appear in browser code." Nav states this explicitly and the widget
+    architecture enforces it — the widget runs in a cross-origin iframe so Nav data never enters the
+    partner's JavaScript context.
+  additional_control: >-
+    Widget-bearing origins must be registered with Nav before production. The allow list is itself
+    an API surface (GET/PUT /v1/origins) and supports exact origins plus single-level wildcards
+    (https://*.example.com matches one subdomain label only).
+  reuse_failure_mode: >-
+    Reusing a cached init token causes the widget to terminate with a SESSION_ERROR after a failed
+    session exchange. See errors/nav-error-codes.yml.
+  source: https://api-docs.nav.com/docs/widgets/getting-started
+gaps:
+  oauth2: >-
+    No OAuth 2.0 or OpenID Connect anywhere on the Nav surface. No /.well-known/oauth-authorization-server,
+    no /.well-known/openid-configuration (all 404 — see well-known/nav-well-known.yml). scopes/ is
+    therefore not emitted for this provider: a static bearer key has no scope surface, and an empty
+    OAuthScopes artifact would be a fabrication.
+  key_prefix: >-
+    Nav does not publish a key prefix convention (no lp_/sk_test_ style discriminator), so a partner
+    cannot tell a sandbox key from a production key by inspection. The environment is selected by
+    base URL (api.nav.com vs api.sandbox.nav.com), not by the credential.
