@@ -12,6 +12,17 @@ description: >-
   with the @navinc/widget-sdk embeddable widget SDK, which renders Nav business-credit UI inside a
   partner's own application as the <nav-credit-widget> custom element. Access is partner-gated:
   API keys are issued during onboarding and there is no self-serve developer signup.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://api-docs.nav.com/img/nav-logo-on-light.svg
 url: https://raw.githubusercontent.com/api-evangelist/nav/refs/heads/main/apis.yml
 x-type: company
