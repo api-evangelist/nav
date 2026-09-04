@@ -23,6 +23,22 @@ deliveryModel:
   - pricing
   generated: '2026-08-28'
   method: derived
+accessModel:
+  pricing: freemium
+  onboarding: self-serve
+  trial: false
+  try_now: true
+  public: false
+  label: Freemium · Self-serve signup
+  confidence: high
+  source:
+  - plans
+  - authentication
+  - rate-limits
+  - security
+  - sandbox
+  generated: '2026-09-03'
+  method: derived
 image: https://api-docs.nav.com/img/nav-logo-on-light.svg
 url: https://raw.githubusercontent.com/api-evangelist/nav/refs/heads/main/apis.yml
 x-type: company
@@ -159,8 +175,9 @@ common:
   url: errors/nav-error-codes.yml
 - type: DataModel
   url: data-model/nav-data-model.yml
-- type: MCPServer
+- type: X-MCPServerCandidate
   url: mcp/nav-mcp.yml
+  note: 'Renamed from MCPServer 2026-09-03 (roadmap#247): the manifest self-describes as status: candidate — a tool list derived from the published API contracts, not an existing server. The scorer already read the manifest and reported mcp_server correctly; the MCPServer type was crediting the artifact-type surfaces with a server that does not exist.'
 - type: LLMsTxt
   url: llms/nav-llms.txt
 x-enrichment:
