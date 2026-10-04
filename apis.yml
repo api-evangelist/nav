@@ -49,7 +49,7 @@ modified: '2026-08-26'
 tags:
 - Business Credit
 - Small Business
-- Financial-Services
+- Financial Services
 - Embedded Finance
 - Lending
 - Credit Score
@@ -68,6 +68,7 @@ tags_raw:
 - Financing Marketplace
 - Fintech
 - Partner API
+- Financial-Services
 apis:
 - name: Nav Partner API
   description: >-
