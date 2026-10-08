@@ -85,3 +85,35 @@ notes:
   licence: >-
     "California loans arranged pursuant to Department of Financial Protection & Innovation Lenders
     License 60DBO-98588."
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - free
+  - subscription
+  units: []
+  plans:
+  - name: Free
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods: []
+  - name: Track
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods: []
+  - name: Build
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods: []
+  - name: Expand
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods: []
