@@ -64,5 +64,114 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Nav is a company surfaced via the API Evangelist harvest backlog (source: secondary-market) and added to the network as a stub for full-pipeline profiling.
-- https://forgeglobal.com/nav_stock/
+Nav Technologies, Inc. is a US financial-technology company (not a bank) that gives small business owners one place to see their business and personal credit, cash-flow health and funding eligibility, then matches them to a marketplace of financing and business credit card offers. Consumer-facing products are Nav Prime (business credit building with tradelines, five bureau scores from D&B, Experian, Equifax and TransUnion, bookkeeping and a FICO SBSS score), the Nav Credit Builder Card and a mobile app. The developer surface is the Nav Partner API — a REST API at api.nav.com used by embedded-finance platforms to create Nav accounts, change plans, end a partner relationship, resolve bureau credit visibility and mint single-use SSO tokens — together with the @navinc/widget-sdk embeddable widget SDK, which renders Nav business-credit UI inside a partner's own application as the <nav-credit-widget> custom element. Access is partner-gated: API keys are issued during onboarding and there is no self-serve developer signup.
+
+**Areas:** Business Credit · Small Business · Financial Services · Embedded Finance · Lending · Credit Score · Credit Reporting · Financing Marketplace · Fintech · Partner API
+
+## Nav on APIs.io
+
+Everything profiled for Nav is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/nav/](https://apis.io/providers/nav/)** — or go straight to one of the APIs or properties below.
+
+### APIs (1)
+
+- [Nav Partner API](https://apis.io/apis/nav/nav-partner-api/) — REST API for Nav partner integrations. Partners authenticate with a Bearer token API key issued during onboarding and use it to create Nav accounts for…
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [nav-mcp.yml](https://apis.io/servers/nav/nav-mcp-yml/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Nav Authentication](https://apis.io/security/nav/nav-authentication/)
+- [Nav Domain Security](https://apis.io/security/nav/nav-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Nav Plans Pricing](https://apis.io/plans/nav/nav-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Nav Rate Limits](https://apis.io/rate-limits/nav/nav-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.nav.com/)
+- [Documentation](https://api-docs.nav.com/docs/guides/intro)
+- [Getting started](https://api-docs.nav.com/docs/widgets/getting-started)
+- [API reference](https://api-docs.nav.com/docs/rest-api/partner-api)
+- [Pricing](https://www.nav.com/nav-prime/)
+- [Sign up](https://app.nav.com/registration/)
+- [Support](https://help.nav.com/en/)
+- [Blog](https://www.nav.com/blog/)
+- [Terms of service](https://www.nav.com/terms/)
+- [Privacy policy](https://www.nav.com/privacy/)
+- [Status](https://status.nav.com/)
+
+## API Evangelist rating
+
+**Kin Score 42.8** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 66.1 |
+| Contract quality | 0.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 23.7 |
+| Developer ergonomics | 71.4 |
+| Access clarity | 76.3 |
+
+**Agent readiness 11.2** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | — |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | documented (partial credit) |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 24.5** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/nav/](https://apis.io/providers/nav/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Nav: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/nav/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
